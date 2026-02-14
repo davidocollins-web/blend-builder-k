@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blend Builder K</title>
+  <style>
+    :root {
+      --bg: #f7fbff;
+      --card: #ffffff;
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --good: #15803d;
+      --warn: #b45309;
+      --border: #e5e7eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Avenir Next", "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.4;
+      padding: 16px;
+    }
+    .wrap { max-width: 860px; margin: 0 auto; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+      margin-bottom: 14px;
+    }
+    h1 { margin: 0 0 6px; font-size: 1.6rem; }
+    .sub { margin: 0; color: var(--muted); font-size: 0.98rem; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .phonemes {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 14px 0;
+      min-height: 72px;
+    }
+    .chip {
+      min-width: 76px;
+      text-align: center;
+      padding: 16px 14px;
+      border-radius: 14px;
+      border: 2px solid var(--border);
+      font-size: 1.7rem;
+      font-weight: 700;
+      background: #fff;
+    }
+    .word {
+      text-align: center;
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      margin: 4px 0 10px;
+      min-height: 52px;
+    }
+    .imgbox {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 84px;
+      font-size: 3rem;
+      margin: 4px 0 12px;
+    }
+    button, select, input[type="checkbox"] {
+      font: inherit;
+    }
+    button {
+      border: 1px solid var(--border);
+      background: #fff;
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover { border-color: #cdd5df; }
+    .primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .good { color: var(--good); font-weight: 700; }
+    .warn { color: var(--warn); font-weight: 700; }
+    .stats {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .pill {
+      padding: 5px 10px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: #fff;
+    }
+    .small { font-size: 0.92rem; color: var(--muted); }
+    .footer { text-align: center; color: var(--muted); font-size: 0.86rem; margin-top: 10px; }
+    .hidden { display: none; }
+    .spacer { height: 4px; }
+    .label { font-size: 0.9rem; color: var(--muted); margin-right: 4px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Blend Builder K</h1>
+      <p class="sub">Listen to each sound, then blend to read the word. Great for Kindergarten CVC blending practice.</p>
+
+      <div class="row" style="margin-top:10px;">
+        <label class="label" for="difficulty">Set:</label>
+        <select id="difficulty">
+          <option value="cvc">CVC (m, t, a, c, o, i, g, d)</option>
+          <option value="digraph">Digraph Blend (ch, th, sh)</option>
+        </select>
+
+        <label class="row" style="gap:6px;">
+          <input type="checkbox" id="autoBlend" checked />
+          <span class="small">Auto-say whole word after sounds</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="imgbox" id="emojiHint" aria-hidden="true">🧩</div>
+      <div class="phonemes" id="phonemeBoxes"></div>
+      <div class="word" id="wordDisplay" aria-live="polite"></div>
+
+      <div class="row">
+        <button id="btnSounds" class="primary">🔊 Say Sounds</button>
+        <button id="btnBlend">🗣️ Blend Word</button>
+        <button id="btnSlow">🐢 Slow Blend</button>
+        <button id="btnNew">🎲 New Word</button>
+        <button id="btnReveal">👀 Reveal / Hide Word</button>
+      </div>
+
+      <div class="spacer"></div>
+      <div class="row">
+        <button id="btnCorrect">✅ Child Read It</button>
+        <button id="btnRetry">🔁 Needs Another Try</button>
+        <button id="btnReset">🧹 Reset Score</button>
+      </div>
+
+      <p id="feedback" class="small" style="margin:10px 0 0;">Tap “Say Sounds” to start.</p>
+      <div class="stats">
+        <span class="pill">Tried: <strong id="tried">0</strong></span>
+        <span class="pill">Correct: <strong id="correct">0</strong></span>
+        <span class="pill">Accuracy: <strong id="acc">0%</strong></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <strong>Quick parent tips</strong>
+      <ul style="margin-top:8px;">
+        <li>Have your child repeat each sound: “/m/ … /a/ … /t/”</li>
+        <li>Then sweep finger under sounds and say the whole word: “mat”</li>
+        <li>Keep sessions short: 5–8 minutes</li>
+      </ul>
+    </div>
+
+    <p class="footer">Made with ❤️ for Kindergarten readers</p>
+  </div>
+
+  <script>
+    // ---------- Word banks ----------
+    const CVC_WORDS = [
+      { word: "mat", phonemes: ["m","a","t"], emoji: "🧘" },
+      { word: "mad", phonemes: ["m","a","d"], emoji: "😠" },
+      { word: "dad", phonemes: ["d","a","d"], emoji: "👨" },
+      { word: "dig", phonemes: ["d","i","g"], emoji: "⛏️" },
+      { word: "dog", phonemes: ["d","o","g"], emoji: "🐶" },
+      { word: "cat", phonemes: ["c","a","t"], emoji: "🐱" },
+      { word: "cot", phonemes: ["c","o","t"], emoji: "🛏️" },
+      { word: "cod", phonemes: ["c","o","d"], emoji: "🐟" },
+      { word: "tag", phonemes: ["t","a","g"], emoji: "🏷️" },
+      { word: "tam", phonemes: ["t","a","m"], emoji: "🧢" },
+      { word: "mom", phonemes: ["m","o","m"], emoji: "👩" },
+      { word: "gig", phonemes: ["g","i","g"], emoji: "🎵" },
+      { word: "got", phonemes: ["g","o","t"], emoji: "✅" },
+      { word: "dot", phonemes: ["d","o","t"], emoji: "🔴" }
+    ];
+
+    const DIGRAPH_WORDS = [
+      { word: "chat", phonemes: ["ch","a","t"], emoji: "💬" },
+      { word: "chin", phonemes: ["ch","i","n"], emoji: "🙂" },
+      { word: "shop", phonemes: ["sh","o","p"], emoji: "🛍️" },
+      { word: "ship", phonemes: ["sh","i","p"], emoji: "🚢" },
+      { word: "thin", phonemes: ["th","i","n"], emoji: "📏" },
+      { word: "that", phonemes: ["th","a","t"], emoji: "👉" }
+    ];
+
+    // ---------- UI refs ----------
+    const phonemeBoxes = document.getElementById("phonemeBoxes");
+    const wordDisplay = document.getElementById("wordDisplay");
+    const emojiHint = document.getElementById("emojiHint");
+    const feedback = document.getElementById("feedback");
+    const difficulty = document.getElementById("difficulty");
+    const autoBlend = document.getElementById("autoBlend");
+    const triedEl = document.getElementById("tried");
+    const correctEl = document.getElementById("correct");
+    const accEl = document.getElementById("acc");
+
+    const btnSounds = document.getElementById("btnSounds");
+    const btnBlend = document.getElementById("btnBlend");
+    const btnSlow = document.getElementById("btnSlow");
+    const btnNew = document.getElementById("btnNew");
+    const btnReveal = document.getElementById("btnReveal");
+    const btnCorrect = document.getElementById("btnCorrect");
+    const btnRetry = document.getElementById("btnRetry");
+    const btnReset = document.getElementById("btnReset");
+
+    // ---------- State ----------
+    let current = null;
+    let showWord = false;
+    let tried = Number(localStorage.getItem("bb_tried") || 0);
+    let correct = Number(localStorage.getItem("bb_correct") || 0);
+
+    function saveStats() {
+      localStorage.setItem("bb_tried", String(tried));
+      localStorage.setItem("bb_correct", String(correct));
+      renderStats();
+    }
+
+    function renderStats() {
+      triedEl.textContent = tried;
+      correctEl.textContent = correct;
+      const pct = tried === 0 ? 0 : Math.round((correct / tried) * 100);
+      accEl.textContent = pct + "%";
+    }
+
+    // ---------- Speech helpers ----------
+    function speak(text, rate = 0.9, pitch = 1.0) {
+      if (!("speechSynthesis" in window)) return;
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = rate;
+      u.pitch = pitch;
+      u.lang = "en-US";
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(u);
+    }
+
+    function phonemeToSpeech(p) {
+      // Helps clearer letter-sound output for early readers
+      const map = {
+        a: "aah", i: "ih", o: "aw",
+        c: "k", g: "guh", d: "duh", m: "mmm", t: "tuh",
+        ch: "ch", sh: "sh", th: "th"
+      };
+      return map[p] || p;
+    }
+
+    async function saySounds() {
+      if (!current) return;
+      feedback.innerHTML = 'Nice! Repeat each sound with your child.';
+      for (const p of current.phonemes) {
+        speak(phonemeToSpeech(p), 0.72, 1.05);
+        await wait(850);
+      }
+      if (autoBlend.checked) {
+        await wait(300);
+        blendWord();
+      }
+    }
+
+    function blendWord() {
+      if (!current) return;
+      speak(current.word, 0.78, 1.0);
+      feedback.innerHTML = 'Now your child says the whole word.';
+    }
+
+    async function slowBlend() {
+      if (!current) return;
+      // "m...a...t...mat" style
+      const seq = current.phonemes.join(" ... ") + " ... " + current.word;
+      speak(seq, 0.62, 1.0);
+      feedback.innerHTML = 'Use a finger sweep under the sounds while blending.';
+    }
+
+    function wait(ms) {
+      return new Promise(res => setTimeout(res, ms));
+    }
+
+    // ---------- Rendering ----------
+    function getBank() {
+      return difficulty.value === "digraph" ? DIGRAPH_WORDS : CVC_WORDS;
+    }
+
+    function randomWord() {
+      const bank = getBank();
+      const i = Math.floor(Math.random() * bank.length);
+      current = bank[i];
+      renderCurrent();
+      feedback.textContent = "New word ready. Tap “Say Sounds”.";
+    }
+
+    function renderCurrent() {
+      phonemeBoxes.innerHTML = "";
+      current.phonemes.forEach(p => {
+        const div = document.createElement("div");
+        div.className = "chip";
+        div.textContent = p;
+        phonemeBoxes.appendChild(div);
+      });
+      emojiHint.textContent = current.emoji || "🧩";
+      wordDisplay.textContent = showWord ? current.word : "";
+    }
+
+    function markCorrect() {
+      tried += 1;
+      correct += 1;
+      saveStats();
+      feedback.innerHTML = '<span class="good">Awesome! Logged as correct.</span>';
+      randomWord();
+    }
+
+    function markRetry() {
+      tried += 1;
+      saveStats();
+      feedback.innerHTML = '<span class="warn">Great effort—try another one.</span>';
+      randomWord();
+    }
+
+    function resetStats() {
+      tried = 0;
+      correct = 0;
+      saveStats();
+      feedback.textContent = "Scores reset.";
+    }
+
+    // ---------- Events ----------
+    btnSounds.addEventListener("click", saySounds);
+    btnBlend.addEventListener("click", blendWord);
+    btnSlow.addEventListener("click", slowBlend);
+    btnNew.addEventListener("click", randomWord);
+    btnReveal.addEventListener("click", () => {
+      showWord = !showWord;
+      renderCurrent();
+    });
+    btnCorrect.addEventListener("click", markCorrect);
+    btnRetry.addEventListener("click", markRetry);
+    btnReset.addEventListener("click", resetStats);
+    difficulty.addEventListener("change", randomWord);
+
+    // ---------- Init ----------
+    renderStats();
+    randomWord();
+  </script>
+</body>
+</html>
